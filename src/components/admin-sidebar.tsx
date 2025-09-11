@@ -13,12 +13,13 @@ import {
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
 import { UserNav } from "@/components/user-nav";
-import { Home, ListTodo, Settings, BarChart, Users, LayoutDashboard } from "lucide-react";
+import { Home, ListTodo, Settings, BarChart, Users, LayoutDashboard, LineChart } from "lucide-react";
 import { Button } from "./ui/button";
 
 const menuItems = [
   { href: "/admin/home", label: "Home", icon: Home },
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/analytics", label: "Analytics", icon: LineChart },
   { href: "/admin/issues", label: "Issues", icon: ListTodo },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
