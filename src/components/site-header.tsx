@@ -16,7 +16,7 @@ export function SiteHeader() {
           <Link href="/dashboard" className="text-foreground/60 transition-colors hover:text-foreground/80">
             Community Feed
           </Link>
-          <Link href="#" className="text-foreground/60 transition-colors hover:text-foreground/80">
+          <Link href="/dashboard/map" className="text-foreground/60 transition-colors hover:text-foreground/80">
             Map View
           </Link>
           <Link href="#" className="text-foreground/60 transition-colors hover:text-foreground/80">
