@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,7 @@ function AISuggestButton() {
 export function ReportIssueForm() {
   const { toast } = useToast();
   const initialState = { success: false, message: '', category: '' };
-  const [state, formAction] = useFormState(getCategorySuggestion, initialState);
+  const [state, formAction] = useActionState(getCategorySuggestion, initialState);
 
   useEffect(() => {
     if (state.message) {
@@ -75,7 +75,7 @@ export function ReportIssueForm() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="category">Category</Label>
                 <form action={formAction}>
-                  {/* Nesting form for AI suggest button to work with useFormState */}
+                  {/* Nesting form for AI suggest button to work with useActionState */}
                   <AISuggestButton />
                 </form>
               </div>
