@@ -1,23 +1,16 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { issues } from '@/lib/data';
 import { LocateFixed } from 'lucide-react';
 import type { Issue } from '@/lib/types';
-import dynamic from 'next/dynamic';
+import InteractiveMap from '@/components/interactive-map';
 
 export default function MapViewPage() {
   const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]); // Default to LA
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
-
-  // Dynamically import the map component to avoid SSR issues with Leaflet
-  const InteractiveMap = useMemo(() => dynamic(() => import('@/components/interactive-map'), { 
-    ssr: false,
-    loading: () => <p>Loading map...</p>
-  }), []);
-
 
   const handleMarkerClick = (issue: Issue) => {
     setSelectedIssue(issue);
