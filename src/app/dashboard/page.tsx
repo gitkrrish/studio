@@ -106,8 +106,8 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredAndSortedIssues.length > 0 ? (
-          filteredAndSortedIssues.map(issue => (
-            <IssueCard key={issue.id} issue={issue} />
+          filteredAndSortedIssues.map((issue, index) => (
+            <IssueCard key={issue.id} issue={issue} priority={index < 3} />
           ))
         ) : (
             <div className="md:col-span-2 lg:col-span-3 text-center text-muted-foreground py-12">

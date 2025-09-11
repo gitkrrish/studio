@@ -11,6 +11,7 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface IssueCardProps {
   issue: Issue;
+  priority?: boolean;
 }
 
 const statusColors = {
@@ -20,7 +21,7 @@ const statusColors = {
   Rejected: 'bg-red-500',
 };
 
-export function IssueCard({ issue }: IssueCardProps) {
+export function IssueCard({ issue, priority = false }: IssueCardProps) {
   return (
     <Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
       <CardHeader className="p-4">
@@ -52,6 +53,7 @@ export function IssueCard({ issue }: IssueCardProps) {
                 fill
                 className="object-cover transition-transform hover:scale-105"
                 data-ai-hint={issue.imageHint || ''}
+                priority={priority}
               />
             </div>
           </Link>
