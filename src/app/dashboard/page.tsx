@@ -20,7 +20,7 @@ function sortIssues(issues: Issue[], sortOption: SortOption): Issue[] {
   }
 }
 
-export default function DashboardPage({
+export default async function DashboardPage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
