@@ -1,70 +1,28 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { issues } from '@/lib/data';
-import { LocateFixed } from 'lucide-react';
-import type { Issue } from '@/lib/types';
-import dynamic from 'next/dynamic';
 
 export default function MapViewPage() {
-  const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]); // Default to LA
-  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
-
-  const InteractiveMap = useMemo(() => dynamic(() => import('@/components/interactive-map'), { 
-    ssr: false,
-    loading: () => <p>Loading map...</p>
-  }), []);
-
-  const handleMarkerClick = (issue: Issue) => {
-    setSelectedIssue(issue);
-    setMapCenter([issue.location.lat, issue.location.lng]);
-  };
-
-  const handlePopupClose = () => {
-    setSelectedIssue(null);
-  };
-
-  const getUserLocation = useCallback(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setMapCenter([position.coords.latitude, position.coords.longitude]);
-        },
-        () => {
-          // You might want to use a toast notification here
-          alert('Error: The Geolocation service failed.');
-        }
-      );
-    } else {
-      // You might want to use a toast notification here
-      alert("Error: Your browser doesn't support geolocation.");
-    }
-  }, []);
+  const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3655.894396263597!2d78.7501223149787!3d23.82273598466033!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3978d132b775122b%3A0x25d57a8de14653f3!2sSagar%20Municipal%2C%20Corporation!5e0!3m2!1sen!2sin!4v1678886055555!5m2!1sen!2sin";
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="mb-4 flex flex-col md:flex-row md:justify-between md:items-center">
-        <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Issue Map View</h1>
-            <p className="mt-1 text-muted-foreground">Visualize reported issues on the map.</p>
-        </div>
-        <Button onClick={getUserLocation} className="mt-4 md:mt-0">
-          <LocateFixed className="mr-2 h-4 w-4" />
-          Use My Location
-        </Button>
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Issue Map View</h1>
+        <p className="mt-1 text-muted-foreground">Location of Sagar Municipal Corporation.</p>
       </div>
       <Card>
         <CardContent className="p-0">
-          <div className="relative h-[calc(100vh-250px)] w-full overflow-hidden rounded-lg">
-            <InteractiveMap
-              center={mapCenter}
-              issues={issues}
-              selectedIssue={selectedIssue}
-              onMarkerClick={handleMarkerClick}
-              onPopupClose={handlePopupClose}
-            />
+          <div className="relative h-[calc(100vh-220px)] w-full overflow-hidden rounded-lg">
+            <iframe
+              src={mapUrl}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
           </div>
         </CardContent>
       </Card>
