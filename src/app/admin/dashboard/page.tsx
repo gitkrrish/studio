@@ -1,6 +1,12 @@
 import { OverviewCards } from '@/components/admin/overview-cards';
-import { CategoryChart } from '@/components/admin/category-chart';
 import { RecentIssues } from '@/components/admin/recent-issues';
+import dynamic from 'next/dynamic';
+
+const CategoryChart = dynamic(
+  () => import('@/components/admin/category-chart').then(mod => mod.CategoryChart),
+  { ssr: false, loading: () => <div className="h-[438px] w-full rounded-lg bg-muted animate-pulse" /> }
+);
+
 
 export default function AdminDashboardPage() {
   return (
