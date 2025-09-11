@@ -24,7 +24,7 @@ export async function getCategorySuggestion(
   if (!validatedFields.success) {
     return {
       success: false,
-      message: "Invalid description provided.",
+      message: "Please enter a description of at least 10 characters to get a suggestion.",
     };
   }
 
@@ -35,7 +35,7 @@ export async function getCategorySuggestion(
     if (result.category) {
       return {
         success: true,
-        message: `Suggested category: ${result.category}`,
+        message: `We've suggested a category based on your description.`,
         category: result.category,
       };
     } else {
