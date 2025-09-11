@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "pothole-1",
+      "description": "A large pothole on a busy street.",
+      "imageUrl": "https://picsum.photos/seed/pothole1/800/600",
+      "imageHint": "pothole road"
+    },
+    {
+      "id": "graffiti-1",
+      "description": "Graffiti on a public wall.",
+      "imageUrl": "https://picsum.photos/seed/graffiti1/800/600",
+      "imageHint": "graffiti wall"
+    },
+    {
+      "id": "trash-1",
+      "description": "Overflowing trash can at a park.",
+      "imageUrl": "https://picsum.photos/seed/trash1/800/600",
+      "imageHint": "overflowing trash"
+    },
+    {
+      "id": "streetlight-1",
+      "description": "Broken streetlight on a residential road.",
+      "imageUrl": "https://picsum.photos/seed/light1/800/600",
+      "imageHint": "broken streetlight"
+    },
+    {
+      "id": "leak-1",
+      "description": "Water pipe leaking onto the sidewalk.",
+      "imageUrl": "https://picsum.photos/seed/leak1/800/600",
+      "imageHint": "water leak"
+    },
+    {
+      "id": "swing-1",
+      "description": "Broken swing set at the local playground.",
+      "imageUrl": "https://picsum.photos/seed/swing1/800/600",
+      "imageHint": "broken swing"
+    }
+  ]
 }
