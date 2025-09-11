@@ -1,16 +1,21 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { issues } from '@/lib/data';
 import { LocateFixed } from 'lucide-react';
 import type { Issue } from '@/lib/types';
-import InteractiveMap from '@/components/interactive-map';
+import dynamic from 'next/dynamic';
 
 export default function MapViewPage() {
   const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]); // Default to LA
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+
+  const InteractiveMap = useMemo(() => dynamic(() => import('@/components/interactive-map'), { 
+    ssr: false,
+    loading: () => <p>Loading map...</p>
+  }), []);
 
   const handleMarkerClick = (issue: Issue) => {
     setSelectedIssue(issue);
