@@ -1,23 +1,30 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { issues } from '@/lib/data';
-import GoogleMap from '@/components/google-map';
 import { LocateFixed } from 'lucide-react';
 import type { Issue } from '@/lib/types';
+import dynamic from 'next/dynamic';
 
 export default function MapViewPage() {
-  const [mapCenter, setMapCenter] = useState({ lat: 34.0522, lng: -118.2437 }); // Default to LA
+  const [mapCenter, setMapCenter] = useState<[number, number]>([34.0522, -118.2437]); // Default to LA
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+
+  // Dynamically import the map component to avoid SSR issues with Leaflet
+  const InteractiveMap = useMemo(() => dynamic(() => import('@/components/interactive-map'), { 
+    ssr: false,
+    loading: () => <p>Loading map...</p>
+  }), []);
+
 
   const handleMarkerClick = (issue: Issue) => {
     setSelectedIssue(issue);
-    setMapCenter({ lat: issue.location.lat, lng: issue.location.lng });
+    setMapCenter([issue.location.lat, issue.location.lng]);
   };
 
-  const handleInfoWindowClose = () => {
+  const handlePopupClose = () => {
     setSelectedIssue(null);
   };
 
@@ -25,16 +32,15 @@ export default function MapViewPage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setMapCenter({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
+          setMapCenter([position.coords.latitude, position.coords.longitude]);
         },
         () => {
+          // You might want to use a toast notification here
           alert('Error: The Geolocation service failed.');
         }
       );
     } else {
+      // You might want to use a toast notification here
       alert("Error: Your browser doesn't support geolocation.");
     }
   }, []);
@@ -54,12 +60,12 @@ export default function MapViewPage() {
       <Card>
         <CardContent className="p-0">
           <div className="relative h-[calc(100vh-250px)] w-full overflow-hidden rounded-lg">
-            <GoogleMap
+            <InteractiveMap
               center={mapCenter}
               issues={issues}
               selectedIssue={selectedIssue}
               onMarkerClick={handleMarkerClick}
-              onInfoWindowClose={handleInfoWindowClose}
+              onPopupClose={handlePopupClose}
             />
           </div>
         </CardContent>
