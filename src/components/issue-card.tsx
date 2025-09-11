@@ -51,7 +51,7 @@ export function IssueCard({ issue }: IssueCardProps) {
                 alt={issue.title}
                 fill
                 className="object-cover transition-transform hover:scale-105"
-                data-ai-hint={issue.imageHint}
+                data-ai-hint={issue.imageHint || ''}
               />
             </div>
           </Link>

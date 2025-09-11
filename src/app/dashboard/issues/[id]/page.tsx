@@ -63,7 +63,7 @@ export default function IssueDetailPage({ params }: { params: { id: string } }) 
             <CardContent>
               {issue.imageUrl && (
                 <div className="relative my-4 aspect-video w-full overflow-hidden rounded-lg border">
-                  <Image src={issue.imageUrl} alt={issue.title} fill className="object-cover" data-ai-hint={issue.imageHint} />
+                  <Image src={issue.imageUrl} alt={issue.title} fill className="object-cover" data-ai-hint={issue.imageHint || ''} />
                 </div>
               )}
               <p className="text-foreground/80 leading-relaxed">{issue.description}</p>

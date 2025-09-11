@@ -13,11 +13,11 @@ import { Camera, MapPin, Sparkles } from 'lucide-react';
 import { getCategorySuggestion } from '@/app/actions/categorize-issue';
 import { useToast } from '@/hooks/use-toast';
 
-function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
+function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
-      {pending ? pendingLabel : label}
+    <Button type="submit" disabled={pending} formAction={undefined}>
+      {pending ? "Submitting..." : "Submit Report"}
     </Button>
   );
 }
@@ -38,6 +38,7 @@ export function ReportIssueForm() {
   const [state, formAction] = useActionState(getCategorySuggestion, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const categoryRef = useRef<HTMLButtonElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (state.message) {
@@ -48,16 +49,22 @@ export function ReportIssueForm() {
       });
     }
     if (state.success && state.category && categoryRef.current) {
-        // This is a workaround to update the Select component's displayed value
-        // when using useActionState. A more robust solution might involve a state management library.
         const trigger = categoryRef.current;
-        const valueElement = trigger.querySelector('.text-muted-foreground, .text-sm');
+        const valueElement = trigger.querySelector('span');
         if (valueElement) {
             valueElement.textContent = state.category;
-            valueElement.classList.remove('text-muted-foreground');
         }
     }
   }, [state, toast]);
+
+  const handleAiSuggest = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const formData = new FormData();
+    if(descriptionRef.current?.value) {
+      formData.append('description', descriptionRef.current.value);
+    }
+    formAction(formData);
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -74,14 +81,17 @@ export function ReportIssueForm() {
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" />
+            <Textarea ref={descriptionRef} id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="category">Category</Label>
-                <AISuggestButton formAction={formAction} />
+                 <Button onClick={handleAiSuggest} type="button" variant="outline" size="sm" className="gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    AI Suggest
+                </Button>
               </div>
               <Select name="category" defaultValue={state?.category}>
                 <SelectTrigger ref={categoryRef}>
@@ -118,7 +128,7 @@ export function ReportIssueForm() {
           </div>
 
           <div className="flex justify-end">
-            <SubmitButton label="Submit Report" pendingLabel="Submitting..." />
+            <SubmitButton />
           </div>
         </form>
       </CardContent>
