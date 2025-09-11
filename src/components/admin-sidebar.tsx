@@ -20,8 +20,6 @@ const menuItems = [
   { href: "/admin/home", label: "Home", icon: Home },
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/issues", label: "Issues", icon: ListTodo },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart },
-  { href: "/admin/users", label: "Users/Depts", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -51,7 +49,7 @@ export function AdminSidebar() {
             <SidebarMenuItem key={item.label}>
               <SidebarMenuButton
                 asChild
-                isActive={pathname.startsWith(item.href)}
+                isActive={pathname === item.href}
                 tooltip={{ children: item.label }}
               >
                 <Link href={item.href}>
