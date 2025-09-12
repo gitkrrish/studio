@@ -5,7 +5,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { UserNav } from "@/components/user-nav"
 import { PlusCircle, Menu } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 
 export function MobileNav() {
     return (
@@ -17,7 +17,10 @@ export function MobileNav() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="right">
-                <div className="flex flex-col space-y-4">
+                <SheetHeader className="sr-only">
+                    <SheetTitle>Navigation Menu</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col space-y-4 pt-4">
                     <Link href="/dashboard" className="text-lg font-medium">
                         Community Feed
                     </Link>
