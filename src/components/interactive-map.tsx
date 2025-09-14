@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import React, { useRef, useEffect } from 'react';
 
 
 import L from 'leaflet';
@@ -27,14 +28,39 @@ interface MapProps {
 
 function ChangeView({ center, zoom }: { center: [number, number], zoom: number }) {
   const map = useMap();
-  map.setView(center, zoom);
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [map, center, zoom]);
   return null;
 }
 
 function InteractiveMap({ center, issues, selectedIssue, onMarkerClick, onPopupClose, zoom = 13 }: MapProps) {
+    const mapRef = useRef<L.Map | null>(null);
+
+    const whenCreated = (mapInstance: L.Map) => {
+        mapRef.current = mapInstance;
+    };
+
+    useEffect(() => {
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
+        };
+    }, []);
+
+    if (mapRef.current) {
+        return (
+            <div style={{ height: '100%', width: '100%' }}>
+              <ChangeView center={center} zoom={zoom || 13} />
+              {/* Other map children can go here if they need to be updated */}
+            </div>
+        )
+    }
 
   return (
-    <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+    <MapContainer whenCreated={whenCreated} center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
       <ChangeView center={center} zoom={zoom} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
