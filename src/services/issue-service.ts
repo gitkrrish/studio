@@ -11,7 +11,7 @@ let issues: Issue[] = [...initialIssues];
 // In a real app, you'd have a proper user session. For now, we'll use a mock user.
 const mockUser: Pick<User, 'id' | 'name' | 'avatarUrl'> = {
     id: 'user-1',
-    name: 'Alice Johnson',
+    name: 'Priya Sharma',
     avatarUrl: 'https://i.pravatar.cc/150?u=user-1',
 };
 

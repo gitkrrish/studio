@@ -1,10 +1,10 @@
 import type { Issue, User, Category } from '@/lib/types';
 
 export const users: User[] = [
-  { id: 'user-1', name: 'Alice Johnson', email: 'alice@example.com', avatarUrl: 'https://i.pravatar.cc/150?u=user-1', role: 'citizen' },
-  { id: 'user-2', name: 'Bob Williams', email: 'bob@example.com', avatarUrl: 'https://i.pravatar.cc/150?u=user-2', role: 'citizen' },
-  { id: 'user-3', name: 'Charlie Brown', email: 'charlie@example.com', avatarUrl: 'https://i.pravatar.cc/150?u=user-3', role: 'citizen' },
-  { id: 'admin-1', name: 'AdminISTRATOR', email: 'admin@civicconnect.com', avatarUrl: 'https://i.pravatar.cc/150?u=admin-1', role: 'admin' },
+  { id: 'user-1', name: 'Priya Sharma', email: 'priya@example.com', avatarUrl: 'https://i.pravatar.cc/150?u=user-1', role: 'citizen' },
+  { id: 'user-2', name: 'Rohan Mehta', email: 'rohan@example.com', avatarUrl: 'https://i.pravatar.cc/150?u=user-2', role: 'citizen' },
+  { id: 'user-3', name: 'Sameer Khan', email: 'sameer@example.com', avatarUrl: 'https://i.pravatar.cc/150?u=user-3', role: 'citizen' },
+  { id: 'admin-1', name: 'Admin User', email: 'admin@civify.com', avatarUrl: 'https://i.pravatar.cc/150?u=admin-1', role: 'admin' },
 ];
 
 export const issues: Issue[] = [

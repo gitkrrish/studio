@@ -18,16 +18,16 @@ export function UserNav() {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarImage src="/avatars/user-1.jpg" alt="@user" />
-            <AvatarFallback>U</AvatarFallback>
+            <AvatarFallback>P</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">Citizen User</p>
+            <p className="text-sm font-medium leading-none">Priya Sharma</p>
             <p className="text-xs leading-none text-muted-foreground">
-              citizen@example.com
+              priya@example.com
             </p>
           </div>
         </DropdownMenuLabel>

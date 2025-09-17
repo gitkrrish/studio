@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
                         <Users className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">C. Brown</div>
+                        <div className="text-2xl font-bold">S. Khan</div>
                         <p className="text-xs text-muted-foreground">12 reports this month</p>
                     </CardContent>
                 </Card>
