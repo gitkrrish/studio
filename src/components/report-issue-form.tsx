@@ -11,17 +11,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { issueCategories } from '@/lib/data';
-import { Camera, MapPin, Sparkles, Loader2, CheckCircle } from 'lucide-react';
+import { Camera, Sparkles, Loader2 } from 'lucide-react';
 import { getCategorySuggestion } from '@/app/actions/categorize-issue';
 import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import dynamic from 'next/dynamic';
-
-const LocationPickerMap = dynamic(() => import('./location-picker-map').then(mod => mod.LocationPickerMap), {
-  ssr: false,
-  loading: () => <div className="h-full w-full bg-muted animate-pulse" />,
-});
 
 
 function SubmitButton() {
@@ -43,10 +36,9 @@ export function ReportIssueForm() {
     category: '',
   });
 
-  const [location, setLocation] = useState<[number, number] | null>(null);
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
 
-  const [submitState, submitAction] = useActionState(submitReport, { success: false, message: "" });
+  const [submitState, submitAction, isSubmitPending] = useActionState(submitReport, { success: false, message: "" });
 
 
   useEffect(() => {
@@ -59,7 +51,6 @@ export function ReportIssueForm() {
       if (submitState.success) {
         formRef.current?.reset();
         setFormData({ title: '', description: '', category: '' });
-        setLocation(null);
       }
     }
   }, [submitState, toast]);
@@ -98,10 +89,6 @@ export function ReportIssueForm() {
         }
        }
     });
-  };
-
-  const handleLocationSelect = (lat: number, lng: number) => {
-    setLocation([lat, lng]);
   };
 
   return (
@@ -143,31 +130,11 @@ export function ReportIssueForm() {
                   ))}
                 </SelectContent>
               </Select>
+               <Input type="hidden" name="category" value={formData.category} />
             </div>
-            <div className="grid gap-2">
+             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-               <Dialog>
-                <DialogTrigger asChild>
-                   <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground gap-2">
-                    {location ? <CheckCircle className="h-4 w-4 text-green-500" /> : <MapPin className="h-4 w-4" />}
-                    {location ? `Location Selected: ${location[0].toFixed(4)}, ${location[1].toFixed(4)}` : "Pick location from map"}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl h-[80vh] p-0">
-                  <DialogHeader className="p-4 border-b">
-                    <DialogTitle>Pinpoint the Issue Location</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex-grow h-full">
-                    <LocationPickerMap onLocationSelect={handleLocationSelect} />
-                  </div>
-                   <DialogFooter className="p-4 border-t">
-                    <DialogClose asChild>
-                      <Button>Confirm Location</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-              {location && <Input type="hidden" name="location" value={location.join(',')} />}
+              <Input id="location" name="location" placeholder="e.g., Near Civil Lines, Sagar" required />
             </div>
           </div>
 
