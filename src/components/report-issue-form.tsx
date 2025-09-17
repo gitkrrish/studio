@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useTransition, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +22,7 @@ const initialSubmitState = {
 };
 
 function SubmitButton() {
-  const { pending } = React.useFormStatus();
+  const { pending } = useFormStatus();
   return (
     <Button type="submit" disabled={pending} className="w-full md:w-auto">
       {pending ? <Loader2 className="animate-spin" /> : 'Submit Report'}
