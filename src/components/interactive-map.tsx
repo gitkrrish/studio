@@ -1,14 +1,13 @@
 'use client';
 import 'leaflet/dist/leaflet.css';
-import { Issue } from '@/lib/types';
+import type { Issue } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import React, { useRef, useEffect } from 'react';
-
-
+import React, { useEffect, useMemo } from 'react';
 import L from 'leaflet';
+
 // Fix for default icon issue with webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -35,71 +34,58 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
 }
 
 function InteractiveMap({ center, issues, selectedIssue, onMarkerClick, onPopupClose, zoom = 13 }: MapProps) {
-    const mapRef = useRef<L.Map | null>(null);
 
-    const whenCreated = (mapInstance: L.Map) => {
-        mapRef.current = mapInstance;
-    };
+  const displayMap = useMemo(
+    () => (
+        <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+            <ChangeView center={center} zoom={zoom} />
+            <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {issues.map(issue => (
+                <Marker 
+                key={issue.id} 
+                position={[issue.location.lat, issue.location.lng]}
+                eventHandlers={{
+                    click: () => {
+                    onMarkerClick(issue);
+                    },
+                }}
+                >
+                </Marker>
+            ))}
 
-    useEffect(() => {
-        return () => {
-            if (mapRef.current) {
-                mapRef.current.remove();
-                mapRef.current = null;
-            }
-        };
-    }, []);
-
-    if (mapRef.current) {
-        return (
-            <div style={{ height: '100%', width: '100%' }}>
-              <ChangeView center={center} zoom={zoom || 13} />
-              {/* Other map children can go here if they need to be updated */}
-            </div>
-        )
-    }
+            {selectedIssue && (
+                <Popup 
+                    position={[selectedIssue.location.lat, selectedIssue.location.lng]}
+                    onClose={onPopupClose}
+                    >
+                    <Card className="w-64 border-none shadow-none">
+                        <CardHeader className="p-2">
+                            <CardTitle className="text-base">{selectedIssue.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-2">
+                            <p className="text-xs text-muted-foreground">{selectedIssue.location.address}</p>
+                        </CardContent>
+                        <CardFooter className="p-2">
+                            <Button asChild variant="link" size="sm" className="p-0 h-auto">
+                                <Link href={`/dashboard/issues/${selectedIssue.id}`}>View Details</Link>
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </Popup>
+            )}
+        </MapContainer>
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [issues, onMarkerClick, onPopupClose, selectedIssue]
+  );
 
   return (
-    <MapContainer whenCreated={whenCreated} center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-      <ChangeView center={center} zoom={zoom} />
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      {issues.map(issue => (
-        <Marker 
-          key={issue.id} 
-          position={[issue.location.lat, issue.location.lng]}
-          eventHandlers={{
-            click: () => {
-              onMarkerClick(issue);
-            },
-          }}
-        >
-        </Marker>
-      ))}
-
-      {selectedIssue && (
-          <Popup 
-            position={[selectedIssue.location.lat, selectedIssue.location.lng]}
-            onClose={onPopupClose}
-            >
-             <Card className="w-64 border-none shadow-none">
-                <CardHeader className="p-2">
-                    <CardTitle className="text-base">{selectedIssue.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-2">
-                    <p className="text-xs text-muted-foreground">{selectedIssue.location.address}</p>
-                </CardContent>
-                <CardFooter className="p-2">
-                    <Button asChild variant="link" size="sm" className="p-0 h-auto">
-                        <Link href={`/dashboard/issues/${selectedIssue.id}`}>View Details</Link>
-                    </Button>
-                </CardFooter>
-            </Card>
-          </Popup>
-      )}
-    </MapContainer>
+    <div style={{ height: '100%', width: '100%' }}>
+      {displayMap}
+    </div>
   );
 }
 
