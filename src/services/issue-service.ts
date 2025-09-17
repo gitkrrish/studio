@@ -49,7 +49,7 @@ export async function addIssue(data: {
       lat: 23.8388 + (Math.random() - 0.5) * 0.1, // Randomize location slightly around Sagar
       lng: 78.7378 + (Math.random() - 0.5) * 0.1,
     },
-    imageUrl: data.mediaDataUri,
+    imageUrl: data.mediaDataUri || undefined,
     upvotes: 0,
     reportedBy: mockUser,
     createdAt: new Date().toISOString(),

@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useTransition, useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
+import { useFormStatus, useActionState } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,10 +10,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { issueCategories } from '@/lib/data';
-import { Camera, Sparkles, Loader2 } from 'lucide-react';
+import { Camera, Sparkles, Loader2, X } from 'lucide-react';
 import { getCategorySuggestion } from '@/app/actions/categorize-issue';
 import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 const initialSubmitState = {
   success: false,
@@ -40,6 +41,7 @@ export function ReportIssueForm() {
     title: '',
     description: '',
     category: '',
+    mediaDataUri: '',
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -50,6 +52,24 @@ export function ReportIssueForm() {
   const handleCategoryChange = (category: string) => {
     setFormData(prev => ({ ...prev, category }));
   };
+
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        setFormData(prev => ({ ...prev, mediaDataUri: loadEvent.target?.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveMedia = () => {
+    setFormData(prev => ({...prev, mediaDataUri: ''}));
+    // Reset file input
+    const fileInput = formRef.current?.querySelector('input[type="file"]') as HTMLInputElement;
+    if(fileInput) fileInput.value = '';
+  }
   
   const handleSuggestCategory = async () => {
     if (!formData.description || formData.description.length < 10) {
@@ -87,7 +107,7 @@ export function ReportIssueForm() {
       });
       if (submitState.success) {
         formRef.current?.reset();
-        setFormData({ title: '', description: '', category: '' });
+        setFormData({ title: '', description: '', category: '', mediaDataUri: '' });
       }
     }
   }, [submitState, toast]);
@@ -119,7 +139,7 @@ export function ReportIssueForm() {
                   AI Suggest
                 </Button>
               </div>
-              <Select name="category" value={formData.category} onValueChange={handleCategoryChange} required>
+              <Select name="category-select" value={formData.category} onValueChange={handleCategoryChange} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -141,13 +161,30 @@ export function ReportIssueForm() {
 
           <div className="grid gap-2">
             <Label htmlFor="media">Photo / Video</Label>
-            <Button variant="outline" asChild className="cursor-pointer">
-              <label htmlFor="media-upload" className="w-full justify-start text-muted-foreground gap-2">
-                <Camera className="h-4 w-4" />
-                Upload media
-                <Input id="media-upload" type="file" name="media" className="sr-only" />
-              </label>
-            </Button>
+            {formData.mediaDataUri ? (
+                <div className="relative">
+                    <Image src={formData.mediaDataUri} alt="Media preview" width={200} height={200} className="rounded-md border aspect-video object-cover" />
+                    <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-2 right-2 h-6 w-6"
+                        onClick={handleRemoveMedia}
+                    >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove media</span>
+                    </Button>
+                </div>
+            ) : (
+                <Button variant="outline" asChild className="cursor-pointer">
+                <label htmlFor="media-upload" className="w-full justify-start text-muted-foreground gap-2">
+                    <Camera className="h-4 w-4" />
+                    Upload media
+                    <Input id="media-upload" type="file" name="media" className="sr-only" onChange={handleMediaChange} accept="image/*" />
+                </label>
+                </Button>
+            )}
+             <input type="hidden" name="mediaDataUri" value={formData.mediaDataUri} />
             <p className="text-xs text-muted-foreground">You can upload an image or a short video clip.</p>
           </div>
 

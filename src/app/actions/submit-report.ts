@@ -10,6 +10,7 @@ const schema = z.object({
   description: z.string().min(10, { message: "Description must be at least 10 characters." }),
   category: z.string().min(1, { message: "Please select a category." }),
   location: z.string().min(1, { message: "Please enter a location." }),
+  mediaDataUri: z.string().optional(),
 });
 
 type FormState = {
@@ -26,6 +27,7 @@ export async function submitReport(
     description: formData.get('description'),
     category: formData.get('category'),
     location: formData.get('location'),
+    mediaDataUri: formData.get('mediaDataUri'),
   });
 
   if (!validatedFields.success) {
