@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useTransition } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import React, { useEffect, useRef, useState, useTransition, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +32,7 @@ export function ReportIssueForm() {
   const [category, setCategory] = useState('');
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
 
-  const [submitState, submitAction] = useFormState(submitReport, { success: false, message: "" });
+  const [submitState, submitAction] = useActionState(submitReport, { success: false, message: "" });
 
 
   useEffect(() => {
@@ -79,7 +79,7 @@ export function ReportIssueForm() {
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Report a New Issue</CardTitle>
-        <CardDescription>Provide details about the issue you&apos;ve found. The more details, the better!</CardDescription>
+        <CardDescription>Provide details about the issue you've found. The more details, the better!</CardDescription>
       </CardHeader>
       <CardContent>
         <form ref={formRef} action={submitAction} className="grid gap-6">
