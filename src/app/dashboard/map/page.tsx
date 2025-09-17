@@ -23,8 +23,8 @@ export default function MapViewPage() {
     setSelectedIssue(null);
   };
 
-  // Centered on Anytown, USA
-  const mapCenter: [number, number] = [34.0522, -118.2437];
+  // Centered on Sagar, Madhya Pradesh, India
+  const mapCenter: [number, number] = [23.8388, 78.7378];
 
   return (
     <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
