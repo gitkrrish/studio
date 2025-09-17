@@ -11,7 +11,7 @@ export default function LoginPage() {
       <Card className="mx-auto w-full max-w-sm">
         <CardHeader className="text-center">
           <Icons.logo className="mx-auto h-12 w-auto" />
-          <CardTitle className="mt-4 text-2xl font-bold tracking-tight">Welcome to CivicConnect</CardTitle>
+          <CardTitle className="mt-4 text-2xl font-bold tracking-tight">Welcome to Civify</CardTitle>
           <CardDescription>Sign in to your citizen account</CardDescription>
         </CardHeader>
         <CardContent>

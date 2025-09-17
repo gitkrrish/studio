@@ -10,7 +10,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'CivicConnect',
+  title: 'Civify',
   description: 'Civic Issue Reporting & Resolution System',
 };
 

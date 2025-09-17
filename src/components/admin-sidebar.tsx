@@ -41,7 +41,7 @@ export function AdminSidebar() {
               <Icons.logo className="size-8 text-primary" />
             </Link>
           </Button>
-          <span className="font-bold text-lg">CivicConnect</span>
+          <span className="font-bold text-lg">Civify</span>
         </div>
         <SidebarTrigger />
       </SidebarHeader>

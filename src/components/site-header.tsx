@@ -11,7 +11,7 @@ export function SiteHeader() {
       <div className="container flex h-16 items-center">
         <Link href="/dashboard" className="mr-6 flex items-center space-x-2">
           <Icons.logo className="h-8 w-8 text-primary" />
-          <span className="hidden font-bold sm:inline-block">CivicConnect</span>
+          <span className="hidden font-bold sm:inline-block">Civify</span>
         </Link>
         <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
           <Link href="/dashboard" className="text-foreground/60 transition-colors hover:text-foreground/80">

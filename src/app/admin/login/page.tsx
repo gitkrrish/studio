@@ -12,7 +12,7 @@ export default function AdminLoginPage() {
         <CardHeader className="text-center">
           <Icons.logo className="mx-auto h-12 w-auto" />
           <CardTitle className="mt-4 text-2xl font-bold tracking-tight">Admin Panel</CardTitle>
-          <CardDescription>Sign in to manage CivicConnect</CardDescription>
+          <CardDescription>Sign in to manage Civify</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4">

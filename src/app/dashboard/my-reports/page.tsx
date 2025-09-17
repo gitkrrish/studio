@@ -20,7 +20,7 @@ export default async function MyReportsPage() {
           My Reported Issues
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Here are the issues you have reported to CivicConnect.
+          Here are the issues you have reported to Civify.
         </p>
       </div>
 
