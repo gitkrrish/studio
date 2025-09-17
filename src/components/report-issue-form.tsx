@@ -46,7 +46,7 @@ export function ReportIssueForm() {
   const [location, setLocation] = useState<[number, number] | null>(null);
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
 
-  const [submitState, submitAction, isSubmitPending] = useActionState(submitReport, { success: false, message: "" });
+  const [submitState, submitAction] = useActionState(submitReport, { success: false, message: "" });
 
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export function ReportIssueForm() {
         setLocation(null);
       }
     }
-  }, [submitState]);
+  }, [submitState, toast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -184,9 +184,7 @@ export function ReportIssueForm() {
           </div>
 
           <div className="flex justify-end">
-             <Button type="submit" disabled={isSubmitPending} className="w-full md:w-auto">
-                {isSubmitPending ? <Loader2 className="animate-spin" /> : "Submit Report"}
-            </Button>
+             <SubmitButton />
           </div>
         </form>
       </CardContent>
