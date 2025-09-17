@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useTransition, useActionState } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,11 +16,6 @@ import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
-const initialSubmitState = {
-  success: false,
-  message: '',
-};
-
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -33,10 +28,8 @@ function SubmitButton() {
 export function ReportIssueForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [submitState, formAction] = useActionState(submitReport, initialSubmitState);
-  
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
-
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -99,19 +92,18 @@ export function ReportIssueForm() {
     });
   };
 
-  useEffect(() => {
-    if (submitState.message) {
-      toast({
-        title: submitState.success ? 'Report Submitted!' : 'Submission Failed',
-        description: submitState.message,
-        variant: submitState.success ? 'default' : 'destructive',
-      });
-      if (submitState.success) {
+  const handleFormAction = async (formData: FormData) => {
+    const result = await submitReport(null, formData);
+    toast({
+        title: result.success ? 'Report Submitted!' : 'Submission Failed',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+    });
+    if (result.success) {
         formRef.current?.reset();
         setFormData({ title: '', description: '', category: '', location: '', mediaDataUri: '' });
-      }
     }
-  }, [submitState, toast]);
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -120,7 +112,7 @@ export function ReportIssueForm() {
         <CardDescription>Provide details about the issue you've found. The more details, the better!</CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} action={formAction} className="grid gap-6">
+        <form ref={formRef} action={handleFormAction} className="grid gap-6">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
             <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={formData.title} onChange={handleInputChange} />
