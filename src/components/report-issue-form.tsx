@@ -102,7 +102,7 @@ export function ReportIssueForm() {
                     AI Suggest
                 </Button>
               </div>
-              <Select name="category" value={category} onValueChange={setCategory} required>
+              <Select value={category} onValueChange={setCategory} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -114,6 +114,7 @@ export function ReportIssueForm() {
                   ))}
                 </SelectContent>
               </Select>
+              <Input type="hidden" name="category" value={category} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
