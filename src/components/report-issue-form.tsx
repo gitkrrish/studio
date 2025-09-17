@@ -38,7 +38,7 @@ export function ReportIssueForm() {
 
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
 
-  const [submitState, submitAction, isSubmitPending] = useActionState(submitReport, { success: false, message: "" });
+  const [submitState, submitAction] = useActionState(submitReport, { success: false, message: "" });
 
 
   useEffect(() => {
