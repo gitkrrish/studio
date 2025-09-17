@@ -1,8 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useTransition } from 'react';
-import { useFormStatus, useActionState } from 'react-dom';
+import React, { useEffect, useRef, useState, useTransition, useActionState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +21,7 @@ const initialSubmitState = {
 };
 
 function SubmitButton() {
-  const { pending } = useFormStatus();
+  const { pending } = React.useFormStatus();
   return (
     <Button type="submit" disabled={pending} className="w-full md:w-auto">
       {pending ? <Loader2 className="animate-spin" /> : 'Submit Report'}
@@ -41,6 +40,7 @@ export function ReportIssueForm() {
     title: '',
     description: '',
     category: '',
+    location: '',
     mediaDataUri: '',
   });
 
@@ -107,7 +107,7 @@ export function ReportIssueForm() {
       });
       if (submitState.success) {
         formRef.current?.reset();
-        setFormData({ title: '', description: '', category: '', mediaDataUri: '' });
+        setFormData({ title: '', description: '', category: '', location: '', mediaDataUri: '' });
       }
     }
   }, [submitState, toast]);
@@ -155,7 +155,7 @@ export function ReportIssueForm() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              <Input id="location" name="location" placeholder="e.g., Near Civil Lines, Sagar" required />
+              <Input id="location" name="location" placeholder="e.g., Near Civil Lines, Sagar" required value={formData.location} onChange={handleInputChange}/>
             </div>
           </div>
 
