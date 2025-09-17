@@ -13,15 +13,10 @@ const schema = z.object({
   mediaDataUri: z.string().optional(),
 });
 
-type FormState = {
-  success: boolean;
-  message: string;
-};
-
 export async function submitReport(
-  prevState: FormState,
+  prevState: { message: string, success: boolean },
   formData: FormData
-): Promise<FormState> {
+): Promise<{ message: string, success: boolean }> {
   const validatedFields = schema.safeParse({
     title: formData.get('title'),
     description: formData.get('description'),
@@ -64,3 +59,4 @@ export async function submitReport(
     }
   }
 }
+
