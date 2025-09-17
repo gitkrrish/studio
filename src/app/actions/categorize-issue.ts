@@ -1,3 +1,4 @@
+
 "use server";
 
 import { categorizeIssue as categorizeIssueWithAI } from "@/ai/flows/categorize-issue-with-ai";
@@ -14,7 +15,6 @@ type FormState = {
 };
 
 export async function getCategorySuggestion(
-  prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
   const validatedFields = schema.safeParse({

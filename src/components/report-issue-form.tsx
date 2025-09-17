@@ -1,9 +1,8 @@
 
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
+import { useFormState, useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { issueCategories } from '@/lib/data';
-import { Camera, MapPin, Sparkles } from 'lucide-react';
+import { Camera, MapPin, Sparkles, Loader2 } from 'lucide-react';
 import { getCategorySuggestion } from '@/app/actions/categorize-issue';
+import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
 
 function SubmitButton() {
@@ -27,22 +27,53 @@ function SubmitButton() {
 export function ReportIssueForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [state, formAction] = useActionState(getCategorySuggestion, { success: false, message: "" });
-  const [category, setCategory] = React.useState('');
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+
+  const [category, setCategory] = useState('');
+  const [isSuggestionPending, startSuggestionTransition] = useTransition();
+
+  const [submitState, submitAction] = useFormState(submitReport, { success: false, message: "" });
+
 
   useEffect(() => {
-    if (state.message) {
-      toast({
-        title: state.success ? 'Suggestion Ready' : 'Error',
-        description: state.message,
-        variant: state.success ? 'default' : 'destructive',
+    if (submitState.message) {
+       toast({
+        title: submitState.success ? 'Report Submitted!' : 'Submission Failed',
+        description: submitState.message,
+        variant: submitState.success ? 'default' : 'destructive',
       });
-      if (state.success && state.category) {
-        setCategory(state.category);
+      if (submitState.success) {
+        formRef.current?.reset();
+        setCategory('');
       }
     }
-  }, [state, toast]);
+  }, [submitState, toast]);
 
+  const handleSuggestCategory = async () => {
+    const description = descriptionRef.current?.value;
+    if (!description || description.length < 10) {
+      toast({
+        title: 'Error',
+        description: "Please enter a description of at least 10 characters to get a suggestion.",
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    startSuggestionTransition(async () => {
+      const result = await getCategorySuggestion(new FormData(formRef.current!));
+       if (result.message) {
+        toast({
+            title: result.success ? 'Suggestion Ready' : 'Error',
+            description: result.message,
+            variant: result.success ? 'default' : 'destructive',
+        });
+        if (result.success && result.category) {
+            setCategory(result.category);
+        }
+       }
+    });
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -51,27 +82,27 @@ export function ReportIssueForm() {
         <CardDescription>Provide details about the issue you&apos;ve found. The more details, the better!</CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} action={formAction} className="grid gap-6">
+        <form ref={formRef} action={submitAction} className="grid gap-6">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" />
+            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" />
+            <Textarea ref={descriptionRef} id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="category">Category</Label>
-                 <Button formAction={formAction} type="submit" variant="outline" size="sm" className="gap-2">
-                    <Sparkles className="h-4 w-4" />
+                 <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handleSuggestCategory} disabled={isSuggestionPending}>
+                    {isSuggestionPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                     AI Suggest
                 </Button>
               </div>
-              <Select name="category" value={category} onValueChange={setCategory}>
+              <Select name="category" value={category} onValueChange={setCategory} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -86,10 +117,11 @@ export function ReportIssueForm() {
             </div>
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              <Button variant="outline" className="w-full justify-start text-muted-foreground gap-2">
+              <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground gap-2">
                 <MapPin className="h-4 w-4" />
                 Pick location from map
               </Button>
+              <Input type="hidden" name="location" value="Sagar, MP" />
             </div>
           </div>
 
