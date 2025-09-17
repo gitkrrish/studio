@@ -1,7 +1,8 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useTransition, useActionState } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
+import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,8 +27,8 @@ const LocationPickerMap = dynamic(() => import('./location-picker-map').then(mod
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending}>
-      {pending ? "Submitting..." : "Submit Report"}
+    <Button type="submit" disabled={pending} className="w-full md:w-auto">
+      {pending ? <Loader2 className="animate-spin" /> : "Submit Report"}
     </Button>
   );
 }
@@ -35,8 +36,9 @@ function SubmitButton() {
 export function ReportIssueForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
-
+  
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [location, setLocation] = useState<[number, number] | null>(null);
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
@@ -53,14 +55,15 @@ export function ReportIssueForm() {
       });
       if (submitState.success) {
         formRef.current?.reset();
+        setTitle('');
+        setDescription('');
         setCategory('');
         setLocation(null);
       }
     }
-  }, [submitState, toast]);
+  }, [submitState.message, submitState.success, toast]);
 
   const handleSuggestCategory = async () => {
-    const description = descriptionRef.current?.value;
     if (!description || description.length < 10) {
       toast({
         title: 'Error',
@@ -71,7 +74,9 @@ export function ReportIssueForm() {
     }
 
     startSuggestionTransition(async () => {
-      const result = await getCategorySuggestion(new FormData(formRef.current!));
+      const formData = new FormData();
+      formData.append('description', description);
+      const result = await getCategorySuggestion(formData);
        if (result.message) {
         toast({
             title: result.success ? 'Suggestion Ready' : 'Error',
@@ -99,12 +104,12 @@ export function ReportIssueForm() {
         <form ref={formRef} action={submitAction} className="grid gap-6">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required />
+            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={title} onChange={e => setTitle(e.target.value)} />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea ref={descriptionRef} id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} />
+            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} value={description} onChange={e => setDescription(e.target.value)} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
