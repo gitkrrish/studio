@@ -1,6 +1,6 @@
 import type { Issue } from '@/lib/types';
 import { IssueCard } from '@/components/issue-card';
-import { issues as allIssues } from '@/lib/data';
+import { getIssues } from '@/services/issue-service';
 import { CommunityFeedClient } from '@/components/community-feed-client';
 
 type SortOption = 'recent' | 'upvoted' | 'commented' | 'urgent';
@@ -28,6 +28,8 @@ export default async function DashboardPage({
   const searchTerm = typeof searchParams.search === 'string' ? searchParams.search : '';
   const selectedCategory = typeof searchParams.category === 'string' ? searchParams.category : 'all';
   const sortOption = typeof searchParams.sort === 'string' ? (searchParams.sort as SortOption) : 'recent';
+
+  const allIssues = await getIssues();
 
   const filteredIssues = allIssues.filter(issue => {
     const matchesSearch = issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

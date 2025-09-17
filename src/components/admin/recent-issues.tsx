@@ -1,11 +1,11 @@
-import { issues } from '@/lib/data';
+import { getIssues } from '@/services/issue-service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Button } from '../ui/button';
 
-export function RecentIssues() {
+export async function RecentIssues() {
+  const issues = await getIssues();
   const recentIssues = [...issues].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
   return (

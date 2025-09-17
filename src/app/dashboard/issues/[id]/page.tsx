@@ -1,5 +1,6 @@
 import Image from 'next/image';
-import { issues, users } from '@/lib/data';
+import { users } from '@/lib/data';
+import { getIssues } from '@/services/issue-service';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +26,8 @@ const statusBgColors: { [key: string]: string } = {
     Rejected: 'bg-red-500',
   };
 
-export default function IssueDetailPage({ params }: { params: { id: string } }) {
+export default async function IssueDetailPage({ params }: { params: { id: string } }) {
+  const issues = await getIssues();
   const issue = issues.find(i => i.id === params.id);
 
   if (!issue) {

@@ -1,7 +1,8 @@
 
 'use client';
 
-import React, { useRef, useState, useTransition } from 'react';
+import React, { useEffect, useRef, useState, useTransition } from 'react';
+import { useFormState } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,33 +15,49 @@ import { getCategorySuggestion } from '@/app/actions/categorize-issue';
 import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
 
+const initialSubmitState = {
+  success: false,
+  message: '',
+};
+
 export function ReportIssueForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const [submitState, formAction] = useFormState(submitReport, initialSubmitState);
+  
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
   const [isSubmitPending, startSubmitTransition] = useTransition();
   
-  const [category, setCategory] = useState('');
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: '',
+    location: '',
+  });
 
-  const handleSuggestCategory = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const form = formRef.current;
-    if (!form) return;
+  const handleCategoryChange = (category: string) => {
+    setFormData(prev => ({...prev, category}));
+  };
 
-    const formData = new FormData(form);
-    const description = formData.get('description') as string;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({...prev, [name]: value}));
+  };
 
-    if (!description || description.length < 10) {
+  const handleSuggestCategory = async () => {
+    if (!formData.description || formData.description.length < 10) {
       toast({
         title: 'Error',
-        description: "Please enter a description of at least 10 characters to get a suggestion.",
+        description: 'Please enter a description of at least 10 characters to get a suggestion.',
         variant: 'destructive',
       });
       return;
     }
 
     startSuggestionTransition(async () => {
-      const result = await getCategorySuggestion(formData);
+      const suggestionFormData = new FormData();
+      suggestionFormData.append('description', formData.description);
+      const result = await getCategorySuggestion(suggestionFormData);
       if (result.message) {
         toast({
             title: result.success ? 'Suggestion Ready' : 'Error',
@@ -48,32 +65,33 @@ export function ReportIssueForm() {
             variant: result.success ? 'default' : 'destructive',
         });
         if (result.success && result.category) {
-            setCategory(result.category);
+            handleCategoryChange(result.category);
         }
       }
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const form = formRef.current;
-    if (!form) return;
-
-    const formData = new FormData(form);
-    
-    startSubmitTransition(async () => {
-      const result = await submitReport(formData);
-      toast({
-        title: result.success ? 'Report Submitted!' : 'Submission Failed',
-        description: result.message,
-        variant: result.success ? 'default' : 'destructive',
-      });
-      if (result.success) {
-        form.reset();
-        setCategory('');
-      }
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    startSubmitTransition(() => {
+        formAction(data);
     });
   };
+
+  useEffect(() => {
+    if (submitState.message) {
+      toast({
+        title: submitState.success ? 'Report Submitted!' : 'Submission Failed',
+        description: submitState.message,
+        variant: submitState.success ? 'default' : 'destructive',
+      });
+      if (submitState.success) {
+        formRef.current?.reset();
+        setFormData({ title: '', description: '', category: '', location: '' });
+      }
+    }
+  }, [submitState, toast]);
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -85,24 +103,24 @@ export function ReportIssueForm() {
         <form ref={formRef} onSubmit={handleSubmit} className="grid gap-6">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required />
+            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={formData.title} onChange={handleChange} />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} />
+            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} value={formData.description} onChange={handleChange} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="category">Category</Label>
-                 <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handleSuggestCategory} disabled={isSuggestionPending}>
-                    {isSuggestionPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                    AI Suggest
+                <Button type="button" variant="outline" size="sm" className="gap-2" onClick={handleSuggestCategory} disabled={isSuggestionPending}>
+                  {isSuggestionPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  AI Suggest
                 </Button>
               </div>
-              <Select name="category" value={category} onValueChange={setCategory} required>
+              <Select name="category" value={formData.category} onValueChange={handleCategoryChange} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -115,9 +133,9 @@ export function ReportIssueForm() {
                 </SelectContent>
               </Select>
             </div>
-             <div className="grid gap-2">
+            <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              <Input id="location" name="location" placeholder="e.g., Near Civil Lines, Sagar" required />
+              <Input id="location" name="location" placeholder="e.g., Near Civil Lines, Sagar" required value={formData.location} onChange={handleChange}/>
             </div>
           </div>
 
@@ -134,8 +152,8 @@ export function ReportIssueForm() {
           </div>
 
           <div className="flex justify-end">
-             <Button type="submit" disabled={isSubmitPending} className="w-full md:w-auto">
-              {isSubmitPending ? <Loader2 className="animate-spin" /> : "Submit Report"}
+            <Button type="submit" disabled={isSubmitPending} className="w-full md:w-auto">
+              {isSubmitPending ? <Loader2 className="animate-spin" /> : 'Submit Report'}
             </Button>
           </div>
         </form>

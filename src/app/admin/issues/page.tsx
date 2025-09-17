@@ -1,9 +1,9 @@
-import { issues } from "@/lib/data"
+import { getIssues } from "@/services/issue-service"
 import { columns } from "./components/columns"
 import { DataTable } from "./components/data-table"
 
 export default async function IssuesPage() {
-  const data = issues
+  const data = await getIssues();
 
   return (
     <div className="container mx-auto py-10">

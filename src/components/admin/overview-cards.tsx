@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ListTodo, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
-import { issues } from '@/lib/data';
+import { getIssues } from '@/services/issue-service';
 
-export function OverviewCards() {
+export async function OverviewCards() {
+  const issues = await getIssues();
   const total = issues.length;
   const pending = issues.filter(i => i.status === 'Reported' || i.status === 'In Progress').length;
   const resolved = issues.filter(i => i.status === 'Resolved').length;

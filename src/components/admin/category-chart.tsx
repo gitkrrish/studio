@@ -2,14 +2,27 @@
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { issues, issueCategories } from '@/lib/data';
-import type { Category } from '@/lib/types';
+import { issueCategories } from '@/lib/data';
+import type { Issue } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import { getIssues } from '@/services/issue-service-client';
+
 
 export function CategoryChart() {
-  const data = issueCategories.map(category => ({
-    name: category,
-    total: issues.filter(issue => issue.category === category).length,
-  }));
+  const [data, setData] = useState<{name: string, total: number}[]>([]);
+
+  useEffect(() => {
+    async function loadChartData() {
+        const issues = await getIssues();
+        const chartData = issueCategories.map(category => ({
+            name: category,
+            total: issues.filter(issue => issue.category === category).length,
+        }));
+        setData(chartData);
+    }
+    loadChartData();
+  }, [])
+
 
   return (
     <Card>

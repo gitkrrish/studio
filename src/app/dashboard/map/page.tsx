@@ -1,10 +1,10 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { issues } from '@/lib/data';
+import { getIssues } from '@/services/issue-service-client';
 import type { Issue } from '@/lib/types';
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const InteractiveMap = dynamic(() => import('@/components/interactive-map'), {
   ssr: false,
@@ -13,7 +13,16 @@ const InteractiveMap = dynamic(() => import('@/components/interactive-map'), {
 
 
 export default function MapViewPage() {
+  const [issues, setIssues] = useState<Issue[]>([]);
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null);
+
+  useEffect(() => {
+    async function loadIssues() {
+        const data = await getIssues();
+        setIssues(data);
+    }
+    loadIssues();
+  }, [])
 
   const handleMarkerClick = (issue: Issue) => {
     setSelectedIssue(issue);
