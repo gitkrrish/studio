@@ -10,10 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { issueCategories } from '@/lib/data';
-import { Camera, MapPin, Sparkles, Loader2 } from 'lucide-react';
+import { Camera, MapPin, Sparkles, Loader2, CheckCircle } from 'lucide-react';
 import { getCategorySuggestion } from '@/app/actions/categorize-issue';
 import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { LocationPickerMap } from './location-picker-map';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -30,6 +32,7 @@ export function ReportIssueForm() {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const [category, setCategory] = useState('');
+  const [location, setLocation] = useState<[number, number] | null>(null);
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
 
   const [submitState, submitAction] = useActionState(submitReport, { success: false, message: "" });
@@ -45,6 +48,7 @@ export function ReportIssueForm() {
       if (submitState.success) {
         formRef.current?.reset();
         setCategory('');
+        setLocation(null);
       }
     }
   }, [submitState, toast]);
@@ -75,6 +79,10 @@ export function ReportIssueForm() {
     });
   };
 
+  const handleLocationSelect = (lat: number, lng: number) => {
+    setLocation([lat, lng]);
+  };
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -102,7 +110,7 @@ export function ReportIssueForm() {
                     AI Suggest
                 </Button>
               </div>
-              <Select value={category} onValueChange={setCategory} required>
+              <Select name="category" value={category} onValueChange={setCategory} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -114,15 +122,31 @@ export function ReportIssueForm() {
                   ))}
                 </SelectContent>
               </Select>
-              <Input type="hidden" name="category" value={category} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground gap-2">
-                <MapPin className="h-4 w-4" />
-                Pick location from map
-              </Button>
-              <Input type="hidden" name="location" value="Sagar, MP" />
+               <Dialog>
+                <DialogTrigger asChild>
+                   <Button type="button" variant="outline" className="w-full justify-start text-muted-foreground gap-2">
+                    {location ? <CheckCircle className="h-4 w-4 text-green-500" /> : <MapPin className="h-4 w-4" />}
+                    {location ? `Location Selected: ${location[0].toFixed(4)}, ${location[1].toFixed(4)}` : "Pick location from map"}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[80vh] p-0">
+                  <DialogHeader className="p-4 border-b">
+                    <DialogTitle>Pinpoint the Issue Location</DialogTitle>
+                  </DialogHeader>
+                  <div className="flex-grow h-full">
+                    <LocationPickerMap onLocationSelect={handleLocationSelect} />
+                  </div>
+                   <DialogFooter className="p-4 border-t">
+                    <DialogClose asChild>
+                      <Button>Confirm Location</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              {location && <Input type="hidden" name="location" value={location.join(',')} />}
             </div>
           </div>
 
