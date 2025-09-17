@@ -1,9 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useTransition } from 'react';
-import { useActionState } from 'react';
-import { useFormStatus } from 'react-dom';
+import React, { useRef, useState, useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,56 +14,23 @@ import { getCategorySuggestion } from '@/app/actions/categorize-issue';
 import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
 
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" disabled={pending} className="w-full md:w-auto">
-      {pending ? <Loader2 className="animate-spin" /> : "Submit Report"}
-    </Button>
-  );
-}
-
 export function ReportIssueForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-  });
-
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
+  const [isSubmitPending, startSubmitTransition] = useTransition();
+  
+  const [category, setCategory] = useState('');
 
-  const [submitState, submitAction] = useActionState(submitReport, { success: false, message: "" });
+  const handleSuggestCategory = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    const form = formRef.current;
+    if (!form) return;
 
+    const formData = new FormData(form);
+    const description = formData.get('description') as string;
 
-  useEffect(() => {
-    if (submitState.message) {
-       toast({
-        title: submitState.success ? 'Report Submitted!' : 'Submission Failed',
-        description: submitState.message,
-        variant: submitState.success ? 'default' : 'destructive',
-      });
-      if (submitState.success) {
-        formRef.current?.reset();
-        setFormData({ title: '', description: '', category: '' });
-      }
-    }
-  }, [submitState, toast]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCategoryChange = (value: string) => {
-    setFormData(prev => ({ ...prev, category: value }));
-  };
-
-  const handleSuggestCategory = async () => {
-    if (!formData.description || formData.description.length < 10) {
+    if (!description || description.length < 10) {
       toast({
         title: 'Error',
         description: "Please enter a description of at least 10 characters to get a suggestion.",
@@ -75,19 +40,38 @@ export function ReportIssueForm() {
     }
 
     startSuggestionTransition(async () => {
-      const fData = new FormData();
-      fData.append('description', formData.description);
-      const result = await getCategorySuggestion(fData);
-       if (result.message) {
+      const result = await getCategorySuggestion(formData);
+      if (result.message) {
         toast({
             title: result.success ? 'Suggestion Ready' : 'Error',
             description: result.message,
             variant: result.success ? 'default' : 'destructive',
         });
         if (result.success && result.category) {
-            handleCategoryChange(result.category);
+            setCategory(result.category);
         }
-       }
+      }
+    });
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = formRef.current;
+    if (!form) return;
+
+    const formData = new FormData(form);
+    
+    startSubmitTransition(async () => {
+      const result = await submitReport(formData);
+      toast({
+        title: result.success ? 'Report Submitted!' : 'Submission Failed',
+        description: result.message,
+        variant: result.success ? 'default' : 'destructive',
+      });
+      if (result.success) {
+        form.reset();
+        setCategory('');
+      }
     });
   };
 
@@ -98,15 +82,15 @@ export function ReportIssueForm() {
         <CardDescription>Provide details about the issue you've found. The more details, the better!</CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} action={submitAction} className="grid gap-6">
+        <form ref={formRef} onSubmit={handleSubmit} className="grid gap-6">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={formData.title} onChange={handleChange} />
+            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} value={formData.description} onChange={handleChange} />
+            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,7 +102,7 @@ export function ReportIssueForm() {
                     AI Suggest
                 </Button>
               </div>
-              <Select name="category" value={formData.category} onValueChange={handleCategoryChange} required>
+              <Select name="category" value={category} onValueChange={setCategory} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
@@ -130,7 +114,6 @@ export function ReportIssueForm() {
                   ))}
                 </SelectContent>
               </Select>
-               <Input type="hidden" name="category" value={formData.category} />
             </div>
              <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
@@ -151,7 +134,9 @@ export function ReportIssueForm() {
           </div>
 
           <div className="flex justify-end">
-             <SubmitButton />
+             <Button type="submit" disabled={isSubmitPending} className="w-full md:w-auto">
+              {isSubmitPending ? <Loader2 className="animate-spin" /> : "Submit Report"}
+            </Button>
           </div>
         </form>
       </CardContent>
