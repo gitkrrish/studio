@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button';
 import Link from 'next/link';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import L from 'leaflet';
 
 // Fix for default icon issue with webpack
@@ -35,8 +35,8 @@ function ChangeView({ center, zoom }: { center: [number, number], zoom: number }
 
 function InteractiveMap({ center, issues, selectedIssue, onMarkerClick, onPopupClose, zoom = 13 }: MapProps) {
 
-  const displayMap = useMemo(
-    () => (
+  return (
+    <div style={{ height: '100%', width: '100%' }}>
         <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
             <ChangeView center={center} zoom={zoom} />
             <TileLayer
@@ -49,7 +49,7 @@ function InteractiveMap({ center, issues, selectedIssue, onMarkerClick, onPopupC
                 position={[issue.location.lat, issue.location.lng]}
                 eventHandlers={{
                     click: () => {
-                    onMarkerClick(issue);
+                      onMarkerClick(issue);
                     },
                 }}
                 >
@@ -77,14 +77,6 @@ function InteractiveMap({ center, issues, selectedIssue, onMarkerClick, onPopupC
                 </Popup>
             )}
         </MapContainer>
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [issues, onMarkerClick, onPopupClose, selectedIssue]
-  );
-
-  return (
-    <div style={{ height: '100%', width: '100%' }}>
-      {displayMap}
     </div>
   );
 }
