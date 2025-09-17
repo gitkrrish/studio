@@ -1,12 +1,14 @@
+
 'use client';
 import 'leaflet/dist/leaflet.css';
 import type { Issue } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import Link from 'next/link';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import React, { useEffect } from 'react';
+import { useMap, Marker as LeafletMarker, Popup as LeafletPopup } from 'react-leaflet';
+import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import ReactDOMServer from 'react-dom/server';
 
 // Fix for default icon issue with webpack
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -25,42 +27,57 @@ interface MapProps {
   zoom?: number;
 }
 
-function ChangeView({ center, zoom }: { center: [number, number], zoom: number }) {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(center, zoom);
-  }, [map, center, zoom]);
-  return null;
-}
-
 function InteractiveMap({ center, issues, selectedIssue, onMarkerClick, onPopupClose, zoom = 13 }: MapProps) {
+    const mapRef = useRef<HTMLDivElement>(null);
+    const mapInstanceRef = useRef<L.Map | null>(null);
+    const markersRef = useRef<L.Marker[]>([]);
+    const popupRef = useRef<L.Popup | null>(null);
 
-  return (
-    <div style={{ height: '100%', width: '100%' }}>
-        <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
-            <ChangeView center={center} zoom={zoom} />
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {issues.map(issue => (
-                <Marker 
-                key={issue.id} 
-                position={[issue.location.lat, issue.location.lng]}
-                eventHandlers={{
-                    click: () => {
-                      onMarkerClick(issue);
-                    },
-                }}
-                >
-                </Marker>
-            ))}
+    useEffect(() => {
+        if (mapRef.current && !mapInstanceRef.current) {
+            // Initialize map only once
+            const map = L.map(mapRef.current).setView(center, zoom);
+            mapInstanceRef.current = map;
 
-            {selectedIssue && (
-                <Popup 
-                    position={[selectedIssue.location.lat, selectedIssue.location.lng]}
-                    onClose={onPopupClose}
-                    >
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        const map = mapInstanceRef.current;
+        if (map) {
+            // Cleanup existing markers
+            markersRef.current.forEach(marker => marker.removeFrom(map));
+            markersRef.current = [];
+
+            // Add new markers
+            issues.forEach(issue => {
+                const marker = L.marker([issue.location.lat, issue.location.lng]).addTo(map);
+                marker.on('click', () => onMarkerClick(issue));
+                markersRef.current.push(marker);
+            });
+        }
+        
+        return () => {
+             if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
+        };
+
+    }, [center, zoom, issues, onMarkerClick]);
+
+     useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (map) {
+            // Close existing popup if any
+            if (popupRef.current) {
+                popupRef.current.remove();
+                popupRef.current = null;
+            }
+
+            if (selectedIssue) {
+                 const popupContent = ReactDOMServer.renderToString(
                     <Card className="w-64 border-none shadow-none">
                         <CardHeader className="p-2">
                             <CardTitle className="text-base">{selectedIssue.title}</CardTitle>
@@ -74,9 +91,22 @@ function InteractiveMap({ center, issues, selectedIssue, onMarkerClick, onPopupC
                             </Button>
                         </CardFooter>
                     </Card>
-                </Popup>
-            )}
-        </MapContainer>
+                );
+
+                const popup = L.popup()
+                    .setLatLng([selectedIssue.location.lat, selectedIssue.location.lng])
+                    .setContent(popupContent)
+                    .on('remove', onPopupClose)
+                    .openOn(map);
+
+                popupRef.current = popup;
+            }
+        }
+    }, [selectedIssue, onPopupClose]);
+
+
+  return (
+    <div ref={mapRef} style={{ height: '100%', width: '100%' }}>
     </div>
   );
 }
