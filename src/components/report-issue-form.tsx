@@ -37,9 +37,12 @@ export function ReportIssueForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: '',
+  });
+
   const [location, setLocation] = useState<[number, number] | null>(null);
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
 
@@ -55,16 +58,23 @@ export function ReportIssueForm() {
       });
       if (submitState.success) {
         formRef.current?.reset();
-        setTitle('');
-        setDescription('');
-        setCategory('');
+        setFormData({ title: '', description: '', category: '' });
         setLocation(null);
       }
     }
   }, [submitState.message, submitState.success, toast]);
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setFormData(prev => ({ ...prev, category: value }));
+  };
+
   const handleSuggestCategory = async () => {
-    if (!description || description.length < 10) {
+    if (!formData.description || formData.description.length < 10) {
       toast({
         title: 'Error',
         description: "Please enter a description of at least 10 characters to get a suggestion.",
@@ -74,9 +84,9 @@ export function ReportIssueForm() {
     }
 
     startSuggestionTransition(async () => {
-      const formData = new FormData();
-      formData.append('description', description);
-      const result = await getCategorySuggestion(formData);
+      const fData = new FormData();
+      fData.append('description', formData.description);
+      const result = await getCategorySuggestion(fData);
        if (result.message) {
         toast({
             title: result.success ? 'Suggestion Ready' : 'Error',
@@ -84,7 +94,7 @@ export function ReportIssueForm() {
             variant: result.success ? 'default' : 'destructive',
         });
         if (result.success && result.category) {
-            setCategory(result.category);
+            handleCategoryChange(result.category);
         }
        }
     });
@@ -104,12 +114,12 @@ export function ReportIssueForm() {
         <form ref={formRef} action={submitAction} className="grid gap-6">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={title} onChange={e => setTitle(e.target.value)} />
+            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={formData.title} onChange={handleChange} />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} value={description} onChange={e => setDescription(e.target.value)} />
+            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} value={formData.description} onChange={handleChange} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -121,7 +131,7 @@ export function ReportIssueForm() {
                     AI Suggest
                 </Button>
               </div>
-              <Select name="category" value={category} onValueChange={setCategory} required>
+              <Select name="category" value={formData.category} onValueChange={handleCategoryChange} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
