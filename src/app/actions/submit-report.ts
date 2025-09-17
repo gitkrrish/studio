@@ -27,12 +27,13 @@ export async function submitReport(
   });
 
   if (!validatedFields.success) {
+    const fieldErrors = validatedFields.error.flatten().fieldErrors;
     return {
       success: false,
-      message: validatedFields.error.flatten().fieldErrors.title?.[0] || 
-               validatedFields.error.flatten().fieldErrors.description?.[0] || 
-               validatedFields.error.flatten().fieldErrors.category?.[0] || 
-               "Invalid data provided.",
+      message: fieldErrors.title?.[0] || 
+               fieldErrors.description?.[0] || 
+               fieldErrors.category?.[0] || 
+               "Invalid data provided. Please check the form and try again.",
     };
   }
 
@@ -48,3 +49,4 @@ export async function submitReport(
     message: "Thank you! Your issue has been successfully reported.",
   };
 }
+
