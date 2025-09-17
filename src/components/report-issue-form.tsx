@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useEffect, useRef, useState, useTransition } from 'react';
-import { useFormState } from 'react-dom';
+import React, { useEffect, useRef, useState, useTransition, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,30 +20,37 @@ const initialSubmitState = {
   message: '',
 };
 
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="w-full md:w-auto">
+      {pending ? <Loader2 className="animate-spin" /> : 'Submit Report'}
+    </Button>
+  );
+}
+
 export function ReportIssueForm() {
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
-  const [submitState, formAction] = useFormState(submitReport, initialSubmitState);
+  const [submitState, formAction] = useActionState(submitReport, initialSubmitState);
   
   const [isSuggestionPending, startSuggestionTransition] = useTransition();
-  const [isSubmitPending, startSubmitTransition] = useTransition();
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     category: '',
-    location: '',
   });
 
-  const handleCategoryChange = (category: string) => {
-    setFormData(prev => ({...prev, category}));
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({...prev, [name]: value}));
   };
 
+  const handleCategoryChange = (category: string) => {
+    setFormData(prev => ({ ...prev, category }));
+  };
+  
   const handleSuggestCategory = async () => {
     if (!formData.description || formData.description.length < 10) {
       toast({
@@ -71,14 +78,6 @@ export function ReportIssueForm() {
     });
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    startSubmitTransition(() => {
-        formAction(data);
-    });
-  };
-
   useEffect(() => {
     if (submitState.message) {
       toast({
@@ -88,7 +87,7 @@ export function ReportIssueForm() {
       });
       if (submitState.success) {
         formRef.current?.reset();
-        setFormData({ title: '', description: '', category: '', location: '' });
+        setFormData({ title: '', description: '', category: '' });
       }
     }
   }, [submitState, toast]);
@@ -100,15 +99,15 @@ export function ReportIssueForm() {
         <CardDescription>Provide details about the issue you've found. The more details, the better!</CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} onSubmit={handleSubmit} className="grid gap-6">
+        <form ref={formRef} action={formAction} className="grid gap-6">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={formData.title} onChange={handleChange} />
+            <Input id="title" name="title" placeholder="e.g., Large pothole on Elm Street" required value={formData.title} onChange={handleInputChange} />
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} value={formData.description} onChange={handleChange} />
+            <Textarea id="description" name="description" placeholder="Describe the issue in detail..." className="min-h-[120px]" required minLength={10} value={formData.description} onChange={handleInputChange}/>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -132,10 +131,11 @@ export function ReportIssueForm() {
                   ))}
                 </SelectContent>
               </Select>
+               <input type="hidden" name="category" value={formData.category} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="location">Location</Label>
-              <Input id="location" name="location" placeholder="e.g., Near Civil Lines, Sagar" required value={formData.location} onChange={handleChange}/>
+              <Input id="location" name="location" placeholder="e.g., Near Civil Lines, Sagar" required />
             </div>
           </div>
 
@@ -152,9 +152,7 @@ export function ReportIssueForm() {
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitPending} className="w-full md:w-auto">
-              {isSubmitPending ? <Loader2 className="animate-spin" /> : 'Submit Report'}
-            </Button>
+            <SubmitButton />
           </div>
         </form>
       </CardContent>
