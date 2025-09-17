@@ -15,7 +15,13 @@ import { getCategorySuggestion } from '@/app/actions/categorize-issue';
 import { submitReport } from '@/app/actions/submit-report';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
-import { LocationPickerMap } from './location-picker-map';
+import dynamic from 'next/dynamic';
+
+const LocationPickerMap = dynamic(() => import('./location-picker-map').then(mod => mod.LocationPickerMap), {
+  ssr: false,
+  loading: () => <div className="h-full w-full bg-muted animate-pulse" />,
+});
+
 
 function SubmitButton() {
   const { pending } = useFormStatus();
